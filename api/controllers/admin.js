@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const Admin = require("../models/admin");
 // const {cloudinary} = require('../middlewares/clouddary')
 
+const JWT_SECRET = "VERYsecret123";
+
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
@@ -96,7 +98,7 @@ exports.adminSignIn = async (req, res) => {
   const superAdmin = admin.type === 1;
   const hospitalAdmin = admin.type === 2;
   const reception = admin.type === 3;
-  const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ adminId: admin._id }, JWT_SECRET, {
     expiresIn: "1d"
   });
 
