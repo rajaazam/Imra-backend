@@ -42,12 +42,7 @@ const {
 const { createHospital, getHospital } = require("../controllers/hospital");
 
 const { isAuth } = require("../middlewares/auth");
-// const {
-//   validateUserSignUp,
-//  // validateDoc,
-//   userVlidation,
-//   validateUserSignIn,
-// } = require('../middlewares/validation/user');
+
 const { response } = require("express");
 const storage = multer.diskStorage({});
 // const fileFilter = (req, file, cb) => {
