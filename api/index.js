@@ -23,7 +23,7 @@ app.use(function (req, res, next) {
 });
 
 app.use(express.json());
-app.use(useRouter);c
+app.use(useRouter);
 const PORT = 8000;
 app.get("/", (req, res) => {
   res.send("<h1>Hello world<h1>");
