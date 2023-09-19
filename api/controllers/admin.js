@@ -14,7 +14,8 @@ cloudinary.config({
 
 // for super admin
 exports.createAdmin = async (req, res) => {
-  const { fullname, email, phonenumber, password, type, title } = req.body;
+  const { fullname, email, phonenumber, password, type, title ,
+    addHospital,manageHospital,addAdmin,manageAdmin,services,is_active} = req.body;
 
   if (!req.file) {
     return res.status(400).json({ error: "No image file provided" });
@@ -28,6 +29,12 @@ exports.createAdmin = async (req, res) => {
     password,
     type,
     title,
+    addHospital,
+    manageHospital,
+    addAdmin,
+    services,
+    manageAdmin,
+    is_active,
     avatar: result.secure_url
   });
   await admin.save();
