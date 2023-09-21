@@ -10,12 +10,6 @@ cloudinary.config({
 
 exports.createDocument = async (req, res) => {
     const { doc_name, description, document,} = req.body;
-    //const isNewAdmin = await Admin.isThisEmailInUse(email);
-    // if (!isNewAdmin)
-    //     return res.json({
-    //         success: false,
-    //         message: "This email is already in use ,try sing-in",
-    //     });
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided" });
   }

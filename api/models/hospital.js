@@ -4,26 +4,28 @@ const bcrypt= require('bcrypt');
 const hospitalSchema = new mongoose.Schema({
    fullname: {
        type: String,
-       required: true,
+       //required: true,
      },
      email: {
        type: String,
-       required: true,
+      // required: true,
        unique: true,
      },
      phonenumber:{
        type: String,
-       required: true,
+      // required: true,
      },
      address: {
        type: String,
-       required: true,
+      // required: true,
      },
      branch: {
       type: String,
-      required: true,
+      //required: true,
     },
-   
+    avatar: {
+      type:String
+     },
     
 });
 

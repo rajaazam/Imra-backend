@@ -88,7 +88,9 @@ router.post("/create-document", upload.single("document"), createDocument);
 router.post("/sign-in", userSignIn);
 router.post("/sign-in-admin", adminSignIn);
 router.post("/sign-out", isAuth, signOut);
-router.post("/create-hospital", createHospital);
+router.post("/create-hospital",
+  upload.single("avatar"),
+createHospital);
 router.post("/create-medicalhistory", createMedicalHistory);
 router.post("/create-medicationhistory", createMedicationHistory);
 router.post("/reset-password", changePassword);
@@ -307,11 +309,17 @@ router.delete("/delete-hospital/:id", async (req, res) => {
 });
 
 //Update api hospital
-router.patch("/update-hospital/:id", async (req, res) => {
-  const hospitalId = req.params.id;
-  const updatedData = req.body;
-
+router.patch('/update-hospital/:hospitalId', upload.single('avatar'), async (req, res) => {
   try {
+    const { hospitalId } = req.params;
+    const updatedData = req.body;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      updatedData.avatar = result.secure_url;
+    }
+
+    // Find the hospital by ID and update its information
     const updatedHospital = await Hospital.findByIdAndUpdate(
       hospitalId,
       updatedData,
@@ -319,25 +327,16 @@ router.patch("/update-hospital/:id", async (req, res) => {
     );
 
     if (!updatedHospital) {
-      return res.status(404).json({
-        success: false,
-        message: "Hospital not found."
-      });
+      return res.status(404).json({ message: 'Hospital not found' });
     }
 
-    res.json({
-      success: true,
-      message: "Hospital updated successfully.",
-      data: updatedHospital
-    });
+    return res.status(200).json({ message: 'Hospital updated successfully', updatedHospital });
   } catch (error) {
-    console.error("Error updating hospital:", error);
-    res.status(500).json({
-      success: false,
-      message: "An error occurred while updating the hospital."
-    });
+    console.error('Error:', error);
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
+
 
 // delete api for user
 router.delete("/delete-user/:id", async (req, res) => {
@@ -472,41 +471,7 @@ router.patch(
         .json({ error: "Internal server error", details: error.message });
     }
 
-    //const userId = req.params.userId;
-
-    // try {
-    //   const {fullname,
-    //              email,
-    //             phonenumber ,date_of_birth, country, address, } = req.body;
-
-    //   // Upload the image to Cloudinary
-
-    //     const result = await cloudinary.uploader.upload(req.file.path);
-    //   console.log("result: ", result)
-    //   // Update the user's profile in the database using User.findByIdAndUpdate
-    //   const updatedUser = await User.findByIdAndUpdate(
-    //     userId,
-    //     {
-    //       fullname,
-    //       email,
-    //       phonenumber,
-    //       date_of_birth: date_of_birth,
-    //       address: address,
-    //       country: country,
-    //       avatar: result.secure_url,
-    //     },
-    //     { new: true } // Return the updated document
-    //   );
-
-    //   if (!updatedUser) {
-    //     return res.status(404).json({ error: 'User not found' });
-    //   }
-
-    //   res.status(200).json({ message: 'updated successfully' });
-    // } catch (error) {
-    //   console.error('Error:', error);
-    //   res.status(500).json({ error: 'Internal server error' });
-    // }
+  
   }
 );
 
@@ -627,5 +592,7 @@ router.get("/medication-history/:userId", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
 
 module.exports = router;
