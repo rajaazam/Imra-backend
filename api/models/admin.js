@@ -58,6 +58,16 @@ const adminSchema= new mongoose.Schema({
       default: 0,   // Default value (0 for false)
       enum: [0, 1],
     },
+    reception:{
+      type: Number, // Representing as a number
+      default: 0,   // Default value (0 for false)
+      enum: [0, 1],
+    },
+    manageUser:{
+      type: Number, // Representing as a number
+      default: 0,   // Default value (0 for false)
+      enum: [0, 1],
+    },
     is_active: {
       type: Boolean,
       default: true, // Default value is true, indicating the admin is active

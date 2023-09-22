@@ -9,6 +9,7 @@ cloudinary.config({
 });
 
 exports.createDocument = async (req, res) => {
+
     const { doc_name, description, document,} = req.body;
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided" });
@@ -29,3 +30,33 @@ exports.createDocument = async (req, res) => {
         doc,
     });
   };
+
+//   exports.createDocument = async (req, res) => {
+//     // Assuming you have access to the userId in req.userId after authentication
+//     const { doc_name, description,  document} = req.body;
+//     const userId = req.userId; // Get the userId from the authenticated user
+
+//     if (!req.file) {
+//         return res.status(400).json({ error: "No image file provided" });
+//     }
+
+//     const result = await cloudinary.uploader.upload(req.file.path, {
+//         resource_type: 'auto',
+//     });
+
+//     console.log(result);
+
+//     const doc = await Document({
+//         doc_name,
+//         description,
+//         document: result.secure_url,
+//         userId, // Include the userId in the document
+//     });
+
+//     await doc.save();
+
+//     res.json({
+//         success: true,
+//         doc,
+//     });
+// };
