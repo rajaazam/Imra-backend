@@ -59,6 +59,49 @@ const storage = multer.diskStorage({});
 // };
 const upload = multer({ storage });
 
+
+//get  dishboard total api
+
+router.get('/dishboard', async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    const hospitalCount = await Hospital.countDocuments();
+    const adminCount = await Admin.countDocuments();
+
+    res.json({
+      success: true,
+      data: {
+        userCount,
+        hospitalCount,
+        adminCount
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching counts:', error);
+    res.status(500).json({ success: false, message: 'An error occurred.' });
+  }
+});
+// router.get('/dishboard',async (req,res)=>{
+//   try {
+    
+//     const userCount= await User.countDocument();
+//     const hospitalCount= await Hospital.countDocument();
+//     const adminCount= await Admin.countDocument();
+
+//     res.json({
+//       success:true,
+//       data:{
+//         userCount,
+//         hospitalCount,
+//         adminCount
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error fetching counts:', error);
+//     res.status(500).json({ success: false, message: 'An error occurred.' });
+//   }
+// })
+
 // Doctor create doctor api
   router.post("/create-doctor", upload.single("Image"), createDoctor)
 
@@ -272,6 +315,11 @@ router.get("/all-doc", async (req, res) => {
     res.status(500).json({ success: false, message: "An error occurred." });
   }
 });
+
+
+
+module.exports = router;
+
 //get api all admin.
 router.get("/all-admin", async (req, res) => {
   try {
@@ -451,67 +499,7 @@ router.delete("/delete-user/:id", async (req, res) => {
   }
 });
 
-// reset password
 
-// Reset password using token
-// router.post('/reset-password', async (req, res) => {
-//   try {
-//     const { email, token, newPassword } = req.body;
-
-//     // Find the user by email and check if the token is valid and not expired
-//     const user = await User.findOne({
-//       email,
-//       resetToken: token,
-//       //resetTokenExpiration: { $gt: 1 } // Check if the token is not expired
-//     });
-
-//     if (!user) {
-//       return res.status(400).json({ success: false, message: 'Invalid or expired token.' });
-//     }
-
-//     // Hash the new password before saving it
-//     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-//     // Update the user's password and reset token fields
-//     user.password = hashedPassword;
-//     user.resetToken = null;
-//     user.resetTokenExpiration = null;
-
-//     // Save the updated user object to the database
-//     await user.save();
-
-//     return res.status(200).json({ success: true, message: 'Password reset successfully.' });
-//   } catch (error) {
-//     console.error('Error resetting password:', error);
-//     return res.status(500).json({ success: false, message: 'An error occurred while resetting the password.' });
-//   }
-
-// try {
-//   const { email, token, newPassword } = req.body;
-
-//   // Find the user by email and check if the token is valid and not expired
-//   const user = await User.findOne({
-//     email,
-//     resetToken: token,
-//     resetTokenExpiration: { $gt: 1 }
-//   });
-
-//   if (!user) {
-//     return res.json({ success: false, message: 'Invalid or expired token.' });
-//   }
-
-//   // Update the user's password and clear the reset token
-//   user.password = newPassword;
-//   user.resetToken = undefined;
-//   user.resetTokenExpiration = undefined;
-//   await user.save();
-
-//   res.json({ success: true, message: 'Password reset successful.' });
-// } catch (error) {
-//   console.error('Error resetting password:', error);
-//   res.status(500).json({ success: false, message: 'An error occurred.' });
-// }
-//});
 //user update profile
 router.patch(
   "/userupdate/:userId",
@@ -520,40 +508,31 @@ router.patch(
     try {
       const { userId } = req.params;
       const updatedData = req.body;
-
-      // console.log('Request received with userId:', userId);
-      // console.log('Request body:', updatedData);
-
       if (req.file) {
-        console.log("File received:", req.file);
+       // console.log("File received:", req.file);
         const result = await cloudinary.uploader.upload(req.file.path);
         updatedData.avatar = result.secure_url;
       } else {
         console.log("No file received");
       }
-
-      //console.log('Updating user data:', updatedData);
-
       const updatedUser = await User.findByIdAndUpdate(
         userId,
-        updatedData, // Pass updatedData directly
+        {$set:updatedData,},
+         // Pass updatedData directly
         { new: true }
       );
 
-      // console.log('Updated user:', updatedUser);
 
       if (!updatedUser) {
-        console.log("User not found");
+       // console.log("User not found");
         return res.status(404).json({ message: "User not found" });
       }
-
-      //console.log('Sending response');
       return res
         .status(200)
         .json({ message: "updated successfully", updatedData });
-      //res.status(200).{ message: 'updated successfully' };
+     
     } catch (error) {
-      console.error("Error:", error);
+     // console.error("Error:", error);
       return res
         .status(500)
         .json({ error: "Internal server error", details: error.message });
@@ -681,6 +660,29 @@ router.get("/medication-history/:userId", async (req, res) => {
   }
 });
 
+//get  single user all doc
+router.get("/user_all_doc/:userId", async (req, res) => {
+  try {
+    // Extract the medical history record ID from the request parameters
+    const userId = req.params.userId;
 
+    // Fetch the medical history record by its ID
+    const docRecord = await Document.find({
+      user: userId
+    });
+    // Check if the record exists
+    if (!docRecord) {
+      return res
+        .status(404)
+        .json({ error: "Document record not found" });
+    }
+
+    // Return the medical history record data as a JSON response
+    res.status(200).json({ "success ": 1, data: docRecord });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 module.exports = router;
