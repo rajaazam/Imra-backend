@@ -9,6 +9,10 @@ const MedicalHistory = require("../models/medicalhistory");
 const MedicationHistory = require("../models/medicinehistory");
 const Doctor = require("../models/doctor")
 const cloudinary = require("cloudinary").v2;
+const Question   = require('../models/QuestionModel');
+const Answer = require('../models/AnswerModel');
+const FoodAllergy = require('../models/foodAllergies');
+const Country= require('../models/country_model')
 
 cloudinary.config({
   cloud_name: "dzq1h0xyu",
@@ -44,6 +48,7 @@ const {
   toggleActiveStatus
 } = require("../controllers/admin");
 
+const{createCountry}= require('../controllers/country_contoller');
 const { createHospital, getHospital } = require("../controllers/hospital");
 
 const { isAuth } = require("../middlewares/auth");
@@ -81,29 +86,24 @@ router.get('/dishboard', async (req, res) => {
     res.status(500).json({ success: false, message: 'An error occurred.' });
   }
 });
-// router.get('/dishboard',async (req,res)=>{
-//   try {
-    
-//     const userCount= await User.countDocument();
-//     const hospitalCount= await Hospital.countDocument();
-//     const adminCount= await Admin.countDocument();
 
-//     res.json({
-//       success:true,
-//       data:{
-//         userCount,
-//         hospitalCount,
-//         adminCount
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error fetching counts:', error);
-//     res.status(500).json({ success: false, message: 'An error occurred.' });
-//   }
-// })
 
 // Doctor create doctor api
-  router.post("/create-doctor", upload.single("Image"), createDoctor)
+  router.post("/create-doctor", upload.single("Image"), createDoctor),
+
+  //Country api
+  router.post("/country", upload.single("countryImage"),createCountry )
+
+  // get all country api
+  router.get("/all-country", async (req, res) => {
+    try {
+      const data = await Country.find();
+      res.json({ success: true, data });
+    } catch (error) {
+      console.error("Error fetching Country:", error);
+      res.status(500).json({ success: false, message: "An error occurred." });
+    }
+  });
 
 //Doctor  Get all doctor 
 router.get("/all-doctor", async (req, res) => {
@@ -682,6 +682,108 @@ router.get("/user_all_doc/:userId", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.post('/api/questions', async (req, res) => {
+  try {
+    const { questionText, answers } = req.body;
+
+    // Create a new question using the Question model
+    const newQuestion = new Question({ questionText, answers });
+
+    // Save the question to the database
+    await newQuestion.save();
+
+    res.json({ message: 'Question added successfully', question: newQuestion });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+// get api  question
+router.get('/get/questions', async (req, res) => {
+  try {
+    // Fetch all questions from the database
+    const questions = await Question.find();
+
+    res.json({ questions });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
+//for anser
+  router.post('/api/answers', async (req, res) => {
+  try {
+    const { answerText } = req.body;
+
+    // Create a new answer using the Answer model
+    const newAnswer = new Answer({ answerText });
+
+    // Save the answer to the database
+    await newAnswer.save();
+
+    res.json({ message: 'Answer added successfully', answer: newAnswer });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+// food allgries
+router.post('/api/food-allergies', async (req, res) => {
+  try {
+    const { name, description } = req.body;
+
+    // Create a new food allergy using the FoodAllergy model
+    const newFoodAllergy = new FoodAllergy({ name, description });
+
+    // Save the food allergy to the database
+    await newFoodAllergy.save();
+
+    res.json({ message: 'Food Allergy added successfully', foodAllergy: newFoodAllergy });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+//get api  food allgries
+router.get('/get/food-allergies', async (req, res) => {
+  try {
+    // Fetch all food allergies from the database
+    const foodAllergies = await FoodAllergy.find();
+
+    res.json({ foodAllergies });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+// search api for food allergy
+router.get('/api/food-allergies', async (req, res) => {
+  try {
+    const searchText = req.query.searchText;
+
+    let query = {};
+    if (searchText) {
+      // If searchText is provided, create a case-insensitive regular expression for searching
+      const searchRegex = new RegExp(searchText, 'i');
+      query = { name: searchRegex };
+    }
+
+    // Fetch food allergies from the database based on the query
+    const foodAllergies = await FoodAllergy.find(query);
+
+    res.json({ foodAllergies });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
