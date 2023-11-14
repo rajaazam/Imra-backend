@@ -2,7 +2,6 @@ const express = require("express");
 require("dotenv").config();
 require("./models/db");
 const useRouter = require("./routes/user");
-const documentRouter = require("./routes/document");
 const User = require("./models/user");
 const cors = require("cors");
 
@@ -25,7 +24,6 @@ app.use(function (req, res, next) {
 
 app.use(express.json());
 app.use(useRouter);
-app.use("/doc", documentRouter);
 const PORT = 8000;
 app.get("/", (req, res) => {
     res.send("<h1>Hello world<h1>");
