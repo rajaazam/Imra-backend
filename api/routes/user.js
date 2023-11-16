@@ -13,6 +13,7 @@ const Question   = require('../models/QuestionModel');
 const Answer = require('../models/AnswerModel');
 const FoodAllergy = require('../models/foodAllergies');
 const Country= require('../models/country_model')
+const MyRoutine = require('../models/myroutineModel');
 
 cloudinary.config({
   cloud_name: "dzq1h0xyu",
@@ -105,6 +106,25 @@ router.get('/dishboard', async (req, res) => {
     }
   });
 
+
+  //country delete api
+
+  router.delete('/delete-country/:id', async (req, res) => {
+    const countryId = req.params.id;
+  
+    try {
+      const deletedCountry = await Country.findByIdAndDelete(countryId);
+  
+      if (deletedCountry) {
+        res.json({ success: true, message: 'Country deleted successfully.' });
+      } else {
+        res.status(404).json({ success: false, message: 'Country not found.' });
+      }
+    } catch (error) {
+      console.error('Error deleting Country:', error);
+      res.status(500).json({ success: false, message: 'An error occurred.' });
+    }
+  });
 //Doctor  Get all doctor 
 router.get("/all-doctor", async (req, res) => {
   try {
@@ -715,7 +735,47 @@ router.get('/get/questions', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+// delete  question  api 
+router.delete('/delete/question/:id', async (req, res) => {
+  const questionId = req.params.id;
 
+  try {
+    const deletedQuestion = await Question.findByIdAndDelete(questionId);
+
+    if (deletedQuestion) {
+      res.json({ success: true, message: 'Question deleted successfully.' });
+    } else {
+      res.status(404).json({ success: false, message: 'Question not found.' });
+    }
+  } catch (error) {
+    console.error('Error deleting Question:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});  
+
+
+// patch api for question
+router.patch('/update/questions/:id', async (req, res) => {
+  const questionId = req.params.id;
+  const { questionText, answers } = req.body;
+
+  try {
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      questionId,
+      { questionText, answers },
+      { new: true } // This option returns the updated document
+    );
+
+    if (updatedQuestion) {
+      res.json({ success: true, message: 'Question updated successfully', question: updatedQuestion });
+    } else {
+      res.status(404).json({ success: false, message: 'Question not found.' });
+    }
+  } catch (error) {
+    console.error('Error updating Question:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
 
 //for anser
   router.post('/api/answers', async (req, res) => {
@@ -765,6 +825,47 @@ router.get('/get/food-allergies', async (req, res) => {
   }
 });
 
+// update food allergy api
+router.patch('/api/food-allergies/:id', async (req, res) => {
+  const allergyId = req.params.id;
+  const { name, description } = req.body;
+
+  try {
+    const updatedAllergy = await FoodAllergy.findByIdAndUpdate(
+      allergyId,
+      { name, description },
+      { new: true } // This option returns the updated document
+    );
+
+    if (updatedAllergy) {
+      res.json({ success: true, message: 'Food Allergy updated successfully', foodAllergy: updatedAllergy });
+    } else {
+      res.status(404).json({ success: false, message: 'Food Allergy not found.' });
+    }
+  } catch (error) {
+    console.error('Error updating Food Allergy:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+
+// delete  food allergy api
+router.delete('/delete/food-allergy/:id', async (req, res) => {
+  const allergyId = req.params.id;
+
+  try {
+    const deletedAllergy = await FoodAllergy.findByIdAndDelete(allergyId);
+
+    if (deletedAllergy) {
+      res.json({ success: true, message: 'Food allergy deleted successfully.' });
+    } else {
+      res.status(404).json({ success: false, message: 'Food allergy not found.' });
+    }
+  } catch (error) {
+    console.error('Error deleting Food Allergy:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
 // search api for food allergy
 router.get('/api/food-allergies', async (req, res) => {
   try {
@@ -786,5 +887,115 @@ router.get('/api/food-allergies', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+
+// update country api
+
+router.patch('/updatecountry/:id', upload.single('countryImage'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedData = req.body;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      updatedData.countryImage = result.secure_url;
+    } else {
+      console.log('No file received');
+    }
+
+    const updatedCountry = await Country.findByIdAndUpdate(
+      id,
+      { $set: updatedData },
+      { new: true }
+    );
+
+    if (!updatedCountry) {
+      return res.status(404).json({ message: 'Country not found' });
+    }
+
+    return res.status(200).json({ message: 'Country updated successfully', updatedData });
+  } catch (error) {
+    console.error('Error:', error);
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+
+//my routine  api 
+
+
+router.post('/post/routine', async (req, res) => {
+  try {
+    const { questiontext, answers } = req.body;
+
+    // Create a new MyRoutine using the MyRoutine model
+    const newMyRoutine = new MyRoutine({ questiontext, answers });
+
+    // Save the MyRoutine to the database
+    await newMyRoutine.save();
+
+    res.json({ message: 'Routine added successfully', data: newMyRoutine });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+//get my routine 
+router.get('/get/routines', async (req, res) => {
+  try {
+    // Fetch all routines from the database and sort by the 'question' field in ascending order
+    const routines = await MyRoutine.find().sort({ question: 1 });
+
+    res.json({ success: true, data: routines });
+  } catch (error) {
+    console.error("Error fetching routines:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
+// Update (Patch) a routine by ID
+router.patch('/patch/routine/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { questiontext, answers } = req.body;
+
+    // Find the routine by ID and update the specified fields
+    const updatedRoutine = await MyRoutine.findByIdAndUpdate(
+      id,
+      { $set: { questiontext, answers } },
+      { new: true }
+    );
+
+    if (!updatedRoutine) {
+      return res.status(404).json({ message: 'Routine not found' });
+    }
+
+    res.json({ message: 'Routine updated successfully', data: updatedRoutine });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+/// delete api routine
+router.delete('/delete/routine/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the routine by ID and delete it
+    const deletedRoutine = await MyRoutine.findByIdAndDelete(id);
+
+    if (!deletedRoutine) {
+      return res.status(404).json({ message: 'Routine not found' });
+    }
+
+    res.json({ message: 'Routine deleted successfully', data: deletedRoutine });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 
 module.exports = router;
