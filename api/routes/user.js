@@ -14,12 +14,19 @@ const Answer = require('../models/AnswerModel');
 const FoodAllergy = require('../models/foodAllergies');
 const Country= require('../models/country_model')
 const MyRoutine = require('../models/myroutineModel');
-
+const medicalAllergyController = require('../controllers/medical_allergy_controller');
 cloudinary.config({
   cloud_name: "dzq1h0xyu",
   api_key: "345126432123499",
   api_secret: "cqCvcU_hqshoESszVszEnB5-D_8"
 });
+
+const{
+  createPrivacy,
+  getAllPrivacy ,
+  updatePrivacyById,
+  deletePrivacyById
+}= require("../controllers/privacy_controller")
 
 const{
   createDoctor
@@ -30,6 +37,12 @@ const {
   createMedicationHistory
 } = require("../controllers/medical_history_controller");
 const {
+  createTermCondition,
+  getAllTermConditions,
+  updateTermConditionById,
+  deleteTermConditionById 
+}= require('../controllers/term_condition_controller')
+const {
   createUser,
   userSignIn,
   createProfile,
@@ -39,6 +52,7 @@ const {
 } = require("../controllers/user");
 
 const { createDocument } = require("../controllers/document_controller");
+const environmentalAllergiesController = require('../controllers/EnvAllergy_controller');
 
 //for admin controller
 const {
@@ -996,6 +1010,50 @@ router.delete('/delete/routine/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+
+//term condtion  api start/////
+ 
+
+router.post("/post-term-condition",  createTermCondition),
+router.get("/get-term-condition",  getAllTermConditions),
+router.patch("/update-term-condition/:id",  updateTermConditionById),
+router.delete('/delete-term-condition/:id', deleteTermConditionById)
+//term condtion  api end/////
+
+//Privacy and policy  api start/////
+
+
+router.post("/post-privacy",  createPrivacy),
+router.get("/get-privacy",  getAllPrivacy ),
+router.patch("/update-privacy/:id",  updatePrivacyById ),
+router.delete('/delete-privacy/:id', deletePrivacyById)
+
+//Privacy and policy  api end/////
+router.post('/medical-allergies', medicalAllergyController.createMedicalAllergy);
+
+// Get all medical allergies
+router.get('/get-medical-allergies', medicalAllergyController.getAllMedicalAllergies);
+
+// Update a medical allergy by ID
+router.patch('/update-medical-allergies/:id', medicalAllergyController.updateMedicalAllergyById);
+
+// Delete a medical allergy by ID
+router.delete('/delete-medical-allergies/:id', medicalAllergyController.deleteMedicalAllergyById);
+
+
+
+
+// Create a new environmental allergy
+router.post('/post-environmental-allergies', environmentalAllergiesController.createEnvironmentalAllergy);
+
+// Get all environmental allergies
+router.get('/get-environmental-allergies', environmentalAllergiesController.getAllEnvironmentalAllergies);
+
+// Update an environmental allergy by ID
+router.patch('/update-environmental-allergies/:id', environmentalAllergiesController.updateEnvironmentalAllergyById);
+
+// Delete an environmental allergy by ID
+router.delete('/delete-environmental-allergies/:id', environmentalAllergiesController.deleteEnvironmentalAllergyById);
 
 
 module.exports = router;
