@@ -249,7 +249,7 @@ router.post(
   // userVlidation,
   createReception
 );
-router.post("/create-document", upload.single("document"), createDocument);
+router.post("/create-document",upload.single('file'), createDocument);
 router.post("/sign-in", userSignIn);
 router.post("/sign-in-admin", adminSignIn);
 router.post("/sign-out", isAuth, signOut);
