@@ -52,7 +52,7 @@ router.post(
   // userVlidation,
   createUser
 );
-
+router.post("/sign-in", userSignIn);
 
 router.post("/sign-out", isAuth, signOut);
 
