@@ -10,7 +10,6 @@ const Answer = require('../models/AnswerModel');
 const FoodAllergy = require('../models/foodAllergies');
 const Country= require('../models/country_model')
 const MyRoutine = require('../models/myroutineModel');
-
 cloudinary.config({
   cloud_name: "dzq1h0xyu",
   api_key: "345126432123499",
